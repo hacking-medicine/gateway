@@ -6,12 +6,17 @@ var RealTime = function(options){
 	var queue = [];
 	var interval = null;
 
-	var sendQueue = function(){
+	var sendQueue = function(mapper){
 		if (queue.length == 0){
 			return;
 		}
 
-		var post_data = JSON.stringify(queue);
+		var dst_queue = queue;
+		if (mapper){
+			dst_queue = queue.map(mapper);
+		}
+
+		var post_data = JSON.stringify(dst_queue);
 		var post_options = {
 			method: 'POST',
 			headers: {
@@ -25,11 +30,10 @@ var RealTime = function(options){
 		var request = http.request(post_options, function(res){
 			res.setEncoding('utf8');
       		res.on('data', function (chunk) {
-          		if (chunk == "correct"){
-					queue = [];
-				}
       		});
 		});
+
+		queue = [];
 
 		request.write(post_data);
 		request.end();
@@ -39,8 +43,9 @@ var RealTime = function(options){
 		queue: function(message){
 			queue.push(message);
 		},
-		start: function(){
-			setInterval(sendQueue, 1000);
+		start: function(mapper){
+			setInterval(function(){
+				sendQueue(mapper);}, 1000);
 		},
 		stop: function(){
 			if (interval){
