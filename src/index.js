@@ -1,5 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var cors = require('cors');
 
 var db = require('./db.js')
 var RT = require('./rt.js')
@@ -20,6 +21,7 @@ var app = express();
 app.configure(function(){
  	app.use(bodyParser.json());
   	app.use(app.router);
+  	app.use(cors());
 });
 
 
@@ -36,16 +38,10 @@ app.post('/monitor', function (req, res) {
 
 	for (var i = measurement_list.length - 1; i >= 0; i--) {
 		db.save_measurement(user_id, measurement_list[i]);
-		rt_analysis.queue(measurement_list[i]);
+		//rt_analysis.queue(measurement_list[i]);
 		rt_notifier.queue(measurement_list[i]);
 	};
 
-	res.send('correct');
-});
-
-app.post('/', function(req, res){
-	console.log('recived:');
-	console.log(req.body);
 	res.send('correct');
 });
 
