@@ -5,7 +5,7 @@ var cors = require('cors');
 var db = require('./db.js')
 var RT = require('./rt.js')
 
-db.prepare_thresholds('localhost', 3001);
+db.prepare_thresholds('localhost', 3000);
 
 var rt_analysis = RT({host: 'localhost', port: '3000'});
 rt_analysis.start();

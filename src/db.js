@@ -44,7 +44,7 @@ exports.save_measurement = function(user_id, measurement){
 }
 
 exports.prepare_thresholds = function (rtproc_host, rtproc_port) {
-	connection.query('SELECT user_id, param_t, avg, var;',
+	connection.query('SELECT user_id, param_t, avg, var FROM stats;',
 		function (err, rows, fields) {
 			var payload = [];
 
@@ -65,6 +65,8 @@ exports.prepare_thresholds = function (rtproc_host, rtproc_port) {
 
 				payload.push(threshold);
 			}
+
+			console.log("Found " + payload.length + " thresholds");
 
 			if (payload.length > 0)
 			{
