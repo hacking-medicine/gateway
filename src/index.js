@@ -47,6 +47,11 @@ app.post('/monitor', function (req, res) {
 	res.send('correct');
 });
 
+app.get('/threfresh', function (req, res) {
+	db.prepare_thresholds('localhost', 3000);
+	res.send('correct');
+});
+
 
 //connection.end();
 //rt_analysis.stop();
