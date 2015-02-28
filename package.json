@@ -9,7 +9,6 @@
     "mysql": "2.5.5",
     "body-parser": "*",
     "underscore":"*",
-    "cors":"*",
-    "socket.io":"*"
+    "cors":"*"
   }
 }
