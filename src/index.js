@@ -11,12 +11,14 @@ var rt_analysis = RT({host: 'localhost', port: '3000', path: 'events/1' });
 
 rt_analysis.start(
 	function(e) {
-		return {
-			dataType: param_map[e.param_t],
+		var payload = {
+			dataType: param_map[e.param],
 			value: e.value,
 			time: e.timestamp,
 			patient: 1
-		}
+		};
+
+		return payload;
 	}
 );
 
@@ -56,7 +58,7 @@ app.post('/monitor', function (req, res) {
 
 	for (var i = measurement_list.length - 1; i >= 0; i--) {
 		db.save_measurement(user_id, measurement_list[i]);
-		//rt_analysis.queue(measurement_list[i]);
+		rt_analysis.queue(measurement_list[i]);
 		rt_notifier.queue(measurement_list[i]);
 	};
 

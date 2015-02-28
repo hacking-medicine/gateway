@@ -3,11 +3,11 @@ var http = require('http');
 
 
 var connection = mysql.createConnection({
-  host     : '192.168.59.103',
+  host     : 'localhost',
   user     : 'root',
   password : 'pass',
   database : 'heart',
-  port     :  49154
+  port     :  3306
 });
 
 connection.connect();

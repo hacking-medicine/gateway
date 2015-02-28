@@ -29,7 +29,10 @@ var RealTime = function(options){
 
 		var request = http.request(post_options, function(res){
 			res.setEncoding('utf8');
+			var strData = "";
       		res.on('data', function (chunk) {
+				strData += chunk;
+				console.log(strData);
       		});
 		});
 
