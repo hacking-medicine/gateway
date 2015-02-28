@@ -11,11 +11,12 @@ var connection = mysql.createConnection({
 
 connection.connect();
 
+var param_map = null;
 
 exports.get_params = function(callback){
 	connection.query('SELECT id, param_name FROM params;', 
 		function(err, rows, fields) {
-			var param_map = {};
+			param_map = {};
 			if (err){
 				console.log(err);
 				return;
