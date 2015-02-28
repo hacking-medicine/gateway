@@ -1,4 +1,5 @@
 var mysql = require('mysql');
+var http = require('http');
 
 
 var connection = mysql.createConnection({
@@ -44,62 +45,74 @@ exports.save_measurement = function(user_id, measurement){
 }
 
 exports.prepare_thresholds = function (rtproc_host, rtproc_port) {
-	connection.query('SELECT user_id, param_t, avg, var FROM stats;',
-		function (err, rows, fields) {
-			var payload = [];
+	connection.query('INSERT INTO stats (user_id, param_t, avg, var) SELECT user_id, param_t, AVG (value), STDDEV(value) FROM raw_data GROUP BY user_id, param_t;',
+	function(err, rows, fields) {
 
-			if (err){
-				console.log(err);
-				return;
-			}
-
-			console.log("THQuery done");
-
-			for (var i = 0; i < rows.length; i++) {
-				var threshold = {
-					dataTypeId: rows[i].param_type,
-					thMin: rows[i].avg - 2 * rows[i].dev,
-					thMax: rows[i].avg + 2 * rows[i].dev,
-					triggerId: 1
-				};
-
-				payload.push(threshold);
-			}
-
-			console.log("Found " + payload.length + " thresholds");
-
-			if (payload.length > 0)
-			{
-				var jsonObject = JSON.stringify(payload);
-
-				var postHeaders = {
-					    'Content-Type' : 'application/json',
-						'Content-Length' : Buffer.byteLength(jsonObject, 'utf8')
-				};
-
-				var postOptions = {
-					host: rtproc_host,
-					port: rtproc_port,
-					path: "/thresholds",
-					method: "POST",
-					headers: postHeaders
-				};
-
-				var rPost = http.request(postOptions, function(res) {
-					console.log("statusCode: ", res.statusCode);
-					res.on('data', function(d) {
-						console.info("Returned something");
-						console.info(d);
-					});
-				});
-
-				rPost.write(jsonObject);
-				rPost.end();
-				rPost.on('error', function(e) {
-					    console.error(e);
-				});
-			}
-
+		if (err) {
+			console.log(err);
 		}
-	);
+		else {
+			console.log("Stat calc ok");
+		}
+
+		connection.query('SELECT user_id, param_t, avg, var FROM stats;',
+			function (err, rows, fields) {
+				var payload = [];
+
+				if (err){
+					console.log(err);
+					return;
+				}
+
+				console.log("THQuery done");
+				console.log(JSON.stringify(rows));
+
+				for (var i = 0; i < rows.length; i++) {
+					var threshold = {
+						dataTypeId: rows[i].param_t,
+						thMin: rows[i].avg - 2 * rows[i].var,
+						thMax: rows[i].avg + 2 * rows[i].var,
+						triggerId: 1
+					};
+
+					payload.push(threshold);
+				}
+
+				console.log("Found " + payload.length + " thresholds");
+
+				if (payload.length > 0)
+				{
+					var jsonObject = JSON.stringify(payload);
+
+					var postHeaders = {
+							'Content-Type' : 'application/json',
+							'Content-Length' : Buffer.byteLength(jsonObject, 'utf8')
+					};
+
+					var postOptions = {
+						host: rtproc_host,
+						port: rtproc_port,
+						path: "/thresholds",
+						method: "POST",
+						headers: postHeaders
+					};
+
+					var rPost = http.request(postOptions, function(res) {
+						var strData = "";
+						console.log("statusCode: ", res.statusCode);
+						res.on('data', function(d) {
+							console.info("Returned something");
+							strData += d;
+							console.log(strData);
+						});
+					});
+
+					rPost.write(jsonObject);
+					rPost.end();
+					rPost.on('error', function(e) {
+						console.error(e);
+					});
+				}
+			});
+	});
 }

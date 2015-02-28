@@ -7,18 +7,18 @@ var RT = require('./rt.js')
 
 db.prepare_thresholds('localhost', 3000);
 
-var rt_analysis = RT({host: 'localhost', port: '3000'});
-rt_analysis.start(
-function(e){
-	return {
-		dataType: param_map[e.param_t],
-		value: e.value,
-		time: e.timestamp,
-		patient: e.user_id
-	}
-}
+var rt_analysis = RT({host: 'localhost', port: '3000', path: 'events/1' });
 
-	);
+rt_analysis.start(
+	function(e) {
+		return {
+			dataType: param_map[e.param_t],
+			value: e.value,
+			time: e.timestamp,
+			patient: 1
+		}
+	}
+);
 
 var rt_notifier = RT({host: 'localhost', port: '3001'});
 rt_notifier.start();
